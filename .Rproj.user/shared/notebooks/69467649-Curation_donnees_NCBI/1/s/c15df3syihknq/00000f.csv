@@ -1,2 +1,0 @@
-"0","cleaned_fasta <- gsub(""\n"", """", fasta_content)"
-"0","writeLines(cleaned_fasta, ""HEV_Genomes.fasta"")"

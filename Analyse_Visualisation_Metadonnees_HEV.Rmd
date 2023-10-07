@@ -1,0 +1,165 @@
+---
+title: "Analyse et Visualisation des metadonnees HEV"
+author: "Serigne Fallou MBacke NGOM"
+date: "2023-10-05"
+output: html_document
+---
+
+
+### RESUME DES VARIABLES D'INTERET:
+```{r}
+data_HEV = read.csv2("HEV_metadonneesFiltrees.csv")
+head(data_HEV[,1:5 ])
+head(data_HEV[,6:10 ])
+
+```
+```{r}
+for (i in c("organism", "Assembly.Method", "Sequencing.Technology", "genotype", "isolation_source", "host", "country")){
+  data_HEV[, i] = factor(data_HEV[, i])
+}
+
+summary(data_HEV[, c("organism", "Assembly.Method", "Sequencing.Technology", "genotype", "isolation_source", "host", "country")])
+```
+
+
+
+### VISUALISATION DES DONNEES:
+```{r, warning=FALSE,fig.width=10, fig.height=8}
+library(plotly)
+library(dplyr)
+
+sequence_counts <- data_HEV %>%
+  group_by(Date, country) %>%
+  summarise(SequenceCount = n())
+
+plot <- plot_ly(
+  sequence_counts,
+  x = ~Date,
+  y = ~SequenceCount,
+  color = ~country,
+  type = "scatter",
+  mode = "lines+markers",
+  text = ~paste("Country: ", country, "<br>Year: ", Date, "<br>Sequence Count: ", SequenceCount),
+  marker = list(size = 7, opacity = 0.6)
+) %>%
+  layout(
+    title = "Évolution du Nombre de Séquences par Pays en Fonction des Années",
+    xaxis = list(title = "Année"),
+    yaxis = list(title = "Nombre de Séquences"),
+    showlegend = TRUE,
+    width = 850,
+    height = 450
+  )
+
+# Afficher le graphique interactif
+plot
+
+```
+
+
+```{r}
+library(plotly)
+library(dplyr)
+
+# Supposons que votre jeu de données s'appelle data_HEV et que l'année est dans une colonne appelée "Date"
+
+data_HEV %>%
+  group_by(Date) %>%
+  summarise(SequenceCount = n()) %>%
+  plot_ly(x = ~Date, y = ~SequenceCount, type = "scatter", mode = "lines+markers", text = ~SequenceCount) %>%
+  layout(title = "Évolution du Nombre de Séquences au Fil des Années",
+         xaxis = list(title = "Année"),
+         yaxis = list(title = "Nombre de Séquences"),
+         hovermode = "closest")
+
+```
+
+```{r}
+library(plotly)
+
+data_HEV %>%
+  group_by(SOURCE) %>%
+  summarise(Count = n()) %>%
+  plot_ly(labels = ~SOURCE, values = ~Count, type = "pie") %>%
+  layout(title = "Répartition des Souches HEV")
+
+```
+
+```{r}
+library(plotly)
+
+data_HEV %>%
+  group_by(country) %>%
+  summarise(Count = n()) %>%
+  plot_geo(locations = ~country, z = ~Count, locationmode = "country names") %>%
+  layout(title = "Répartition des Données par Pays")
+
+```
+
+```{r}
+library(plotly)
+library(dplyr)
+
+data_HEV %>%
+  group_by(country) %>%
+  summarise(Count = n()) %>%
+  plot_ly(labels = ~country, values = ~Count, type = "pie") %>%
+  layout(title = "Répartition par Pays")
+```
+
+```{r}
+library(plotly)
+library(dplyr)
+
+data_HEV %>%
+  group_by(genotype) %>%
+  summarise(Count = n()) %>%
+  plot_ly(x = ~genotype, y = ~Count, type = "bar", color = ~genotype) %>%
+  layout(title = "Nombre d'occurrences par Genotype")
+
+```
+
+
+```{r}
+library(plotly)
+library(dplyr)
+
+data_HEV %>%
+  group_by(isolation_source) %>%
+  summarise(Count = n()) %>%
+  plot_ly(x = ~isolation_source, y = ~Count, type = "bar", color = ~isolation_source) %>%
+  layout(title = "Repartition par source d'isolation")
+
+```
+
+```{r}
+library(plotly)
+library(dplyr)
+
+sequence_counts <- data_HEV %>%
+  group_by(host, isolation_source) %>%
+  summarise(SequenceCount = n())
+
+plot <- plot_ly(
+  sequence_counts,
+  x = ~host,
+  y = ~SequenceCount,
+  color = ~isolation_source,
+  type = "scatter",
+  mode = "lines+markers",
+  text = ~paste("Country: ", isolation_source, "<br>Year: ", host, "<br>Sequence Count: ", SequenceCount),
+  marker = list(size = 7, opacity = 0.6)
+) %>%
+  layout(
+    title = "Évolution du Nombre de Séquences par source en Fonction des hotes",
+    xaxis = list(title = "Hotes"),
+    yaxis = list(title = "Nombre de Séquences"),
+    showlegend = TRUE,
+    width = 850,
+    height = 450
+  )
+
+# Afficher le graphique interactif
+plot
+```
+
